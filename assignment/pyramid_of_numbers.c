@@ -1,9 +1,9 @@
 /*----------------------------------------------------------
- *				HTBLA-Leonding / Class: <your class>
+ *				HTBLA-Leonding / Class: 2dhif
  * ---------------------------------------------------------
- * Exercise Number: 0
+ * Exercise Number: 3
  * Title:			Pyramid of Numbers
- * Author:			<Robin Fuchshofer>
+ * Author:		Robin Fuchshofer
  * ----------------------------------------------------------
  * Description:
  * Calculates a pyramid of numbers, i.e., it multiplies a big
@@ -39,7 +39,7 @@ struct BigInt {
 */
 int strtobig_int(const char *str, int len, struct BigInt *big_int)
 {
-	int converted =0;
+	int convert =0;
 	int count = len;
 	len -= 1;
 	for (size_t i = 0; i < count; i++) {
@@ -48,16 +48,26 @@ int strtobig_int(const char *str, int len, struct BigInt *big_int)
 			return 0;
 		}
 		big_int->the_int[i] = str[len] - '0';
-		converted++;
+		convert++;
 		len--;
 	}
-	big_int->digits_count = converted;
-	return converted;
+	big_int->digits_count = convert;
+	return convert;
 }
 /** print_big_int() prints a BigInt.
 *** @param *big_int The BigInt to be printed.
 */
-void print_big_int(const struct BigInt *big_int);
+void print_big_int(const struct BigInt *big_int)
+{
+	bool notnulldigitfound = false;
+		for (int i = 0; i < big_int->digits_count; i++) {
+			if (big_int->the_int[i] > 0 || notnulldigitfound == true)
+			{
+							printf("%d",big_int->the_int[i]);
+							notnulldigitfound = true;
+			}
+		}
+}
 
 /** multiply() multiplies a BigInt by an int.
 *** @param big_int The BigInt to be multiplied.
@@ -88,14 +98,58 @@ void multiply(const struct BigInt *big_int, int factor, struct BigInt *big_resul
 		{
 			big_result->the_int[i]=tempResult;
 		}
+	}
+
 }
-void divide(const struct BigInt *big_int, int divisor, struct BigInt *big_result);
+
+/** divide() multiplies a BigInt by an int.
+*** @param big_int The BigInt to be divided.
+*** @param divisor The int value by which we want to devide big_int.
+*** @param *big_result The result of the division.
+*/
+void divide(const struct BigInt *big_int, int divisor, struct BigInt *big_result)
+{
+	int overflowNumber = 0;
+	int tempResult;
+		for (size_t i = 0; i < big_int->digits_count; i++) {
+			big_result->the_int[i] = 0;
+			big_result->digits_count = i+1;
+			tempResult = overflowNumber*10 + big_int->the_int[i];
+			if (tempResult >= divisor) {
+				big_result->the_int[i] = tempResult / divisor;
+				overflowNumber = tempResult % divisor;
+			}
+			else
+			{
+				overflowNumber = big_int->the_int[i];
+			}
+
+		}
+}
 
 /** copy_big_int() copies a BigInt to another BigInt.
 *** @param from The source where we want to copy from.
 *** @param *to The target where we want to copy to.
 */
-void copy_big_int(const struct BigInt *from, struct BigInt *to);
+void copy_big_int(const struct BigInt *from, struct BigInt *to)
+{
+	from = to;
+}
+
+void bigintarray_reverse(struct BigInt *big_int)
+{
+	int i = big_int->digits_count-1;
+  int j = 0;
+   while(i > j)
+   {
+     int temp = big_int->the_int[i];
+		 int temp2 = big_int->the_int[j];
+     big_int->the_int[i] = temp2;
+     big_int->the_int[j] = temp;
+     i--;
+     j++;
+   }
+}
 
 /**
 *** main() reads the base number from which the pyramid has to be calculated
@@ -112,40 +166,50 @@ int main(int argc, char *argv[])
 {
 	char user_input[MAX_DIGITS];
 	int length;
+	int convert;
 	struct BigInt bigint;
 	struct BigInt bigint_result;
-	int convert;
+	struct BigInt bigint_result_devide;
 	int factor = 2;
-
+	int divisor = 2;
 	printf("Pyramid of Numbers\n");
 	printf("==================\n");
 	printf("Please enter a number: ");
-	scanf("%s",user_input);
-	length = strlen(user_input);
-	convert = strtobig_int(user_input, length, &bigint);
+	scanf("%s", user_input);
 
-	if(convert == 0)
+	length = strlen(user_input);
+	convert = strtobig_int(user_input,length,&bigint);
+
+	if (convert == 0 || user_input[length] == 0)
 	{
 		return 0;
 	}
 
-	printf("Number of characters converted %d \n", convert);
 
 	//multiply converted number
 	for (size_t i = 0; i < 8; i++) {
-			multiply(&bigint,factor,&bigint_result);
-			bigintarray_reverse(&bigint_result);
-			bigintarray_reverse(&bigint);
-			print_big_int(&bigint);
-			printf(" * %d = ",factor);
-			print_big_int(&bigint_result);
-			printf("\n");
-			bigintarray_reverse(&bigint_result);
-			bigintarray_reverse(&bigint);
-			bigint = bigint_result;
-			factor++;
+		multiply(&bigint,factor,&bigint_result);
+		bigintarray_reverse(&bigint_result);
+		bigintarray_reverse(&bigint);
+		print_big_int(&bigint);
+		printf(" * %d = ",factor);
+		print_big_int(&bigint_result);
+		printf("\n");
+		bigintarray_reverse(&bigint_result);
+		bigintarray_reverse(&bigint);
+		bigint = bigint_result;
+		factor++;
 	}
-
-
+	bigintarray_reverse(&bigint_result);
+	//divide multiplied number
+	for (size_t i = 0; i < 8; i++) {
+		print_big_int(&bigint_result);
+		divide(&bigint_result,divisor,&bigint_result_devide);
+		bigint_result = bigint_result_devide;
+		printf(" / %d = ",divisor);
+		print_big_int(&bigint_result_devide);
+		printf("\n");
+		divisor++;
+	}
 	return 0;
 }
